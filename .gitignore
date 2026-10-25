@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Build
+build/
+dist/
+installer/Output/
+
+# Binarios descargados en tiempo de ejecución (yt-dlp, ffmpeg, deno)
+bin/
+
+# Datos locales
+*.log
+.idea/
+.vscode/
