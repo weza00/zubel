@@ -952,21 +952,33 @@ class RangeSlider(QWidget):
             p.setBrush(QColor("white"))
             p.drawEllipse(QPointF(x, cy), r, r)
 
-            # Burbuja con el tiempo
-            text = format_time(val)
-            font = QFont(self.font())
-            font.setPointSizeF(font.pointSizeF() * 0.9)
-            font.setWeight(QFont.Weight.DemiBold)
-            p.setFont(font)
-            tw = p.fontMetrics().horizontalAdvance(text) + 14
-            bx = max(0.0, min(self.width() - tw, x - tw / 2))
-            bubble = QRectF(bx, 0, tw, self.BUBBLE_H - 4)
-            active = g > 0.3
+        # Burbujas con el tiempo (se fusionan en una si se tocan)
+        font = QFont(self.font())
+        font.setPointSizeF(font.pointSizeF() * 0.9)
+        font.setWeight(QFont.Weight.DemiBold)
+        p.setFont(font)
+        fm = p.fontMetrics()
+
+        def bubble_rect(text: str, center: float) -> QRectF:
+            tw = fm.horizontalAdvance(text) + 14
+            return QRectF(max(0.0, min(self.width() - tw, center - tw / 2)), 0, tw, self.BUBBLE_H - 4)
+
+        def draw_bubble(rect: QRectF, text: str, active: bool) -> None:
             p.setPen(Qt.PenStyle.NoPen)
             p.setBrush(QColor(theme.ACCENT) if active else QColor(theme.SURFACE_3))
-            p.drawRoundedRect(bubble, 6, 6)
+            p.drawRoundedRect(rect, 6, 6)
             p.setPen(QColor("white" if active else theme.TEXT))
-            p.drawText(bubble, Qt.AlignmentFlag.AlignCenter, text)
+            p.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
+
+        lo_text, hi_text = format_time(self._lo), format_time(self._hi)
+        lo_rect, hi_rect = bubble_rect(lo_text, x1), bubble_rect(hi_text, x2)
+        lo_active, hi_active = self._grow["lo"] > 0.3, self._grow["hi"] > 0.3
+        if lo_rect.right() + 4 > hi_rect.left():
+            text = f"{lo_text} – {hi_text}"
+            draw_bubble(bubble_rect(text, (x1 + x2) / 2), text, lo_active or hi_active)
+        else:
+            draw_bubble(lo_rect, lo_text, lo_active)
+            draw_bubble(hi_rect, hi_text, hi_active)
 
         # Duración del rango
         span = self._hi - self._lo

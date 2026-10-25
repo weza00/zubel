@@ -303,7 +303,8 @@ def download_args(url: str, opts: DownloadOptions, settings: Settings,
             args += ["--merge-output-format", "mkv", "--recode-video", container]
 
     # --- Rango --------------------------------------------------------------
-    if opts.start is not None or opts.end is not None:
+    is_range = opts.start is not None or opts.end is not None
+    if is_range:
         start = _seconds(opts.start or 0)
         end = _seconds(opts.end) if opts.end is not None else "inf"
         args += ["--download-sections", f"*{start}-{end}"]
@@ -329,9 +330,15 @@ def download_args(url: str, opts: DownloadOptions, settings: Settings,
         args += ["--write-thumbnail", "--convert-thumbnails", "jpg"]
     if opts.embed_metadata:
         args.append("--embed-metadata")
-    if opts.embed_chapters and opts.mode == "video":
+    # Los capítulos (y SponsorBlock) usan tiempos del video completo: en un recorte
+    # dejarían una pista de capítulos con la duración original y el reproductor
+    # creería que el archivo dura todo el video. --embed-metadata los incrusta
+    # implícitamente, así que se desactivan de forma explícita.
+    if opts.embed_chapters and opts.mode == "video" and not is_range:
         args.append("--embed-chapters")
-    if opts.split_chapters:
+    else:
+        args.append("--no-embed-chapters")
+    if opts.split_chapters and not is_range:
         args.append("--split-chapters")
     if opts.write_description:
         args.append("--write-description")
@@ -339,9 +346,9 @@ def download_args(url: str, opts: DownloadOptions, settings: Settings,
         args.append("--write-info-json")
 
     # --- SponsorBlock -------------------------------------------------------
-    if opts.sponsorblock_remove:
+    if opts.sponsorblock_remove and not is_range:
         args += ["--sponsorblock-remove", ",".join(opts.sponsorblock_remove)]
-    if opts.sponsorblock_mark:
+    if opts.sponsorblock_mark and not is_range:
         args += ["--sponsorblock-mark", "all"]
 
     if opts.keep_original:

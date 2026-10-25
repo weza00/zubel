@@ -245,6 +245,10 @@ class DownloadPage(QWidget):
         self.range_note = label("", "subtle", wrap=True)
         self.range_note.hide()
         lay.addWidget(self.range_note)
+        self.cut_note = label("Al recortar no se incrustan capítulos ni se aplica SponsorBlock: "
+                              "sus tiempos corresponden al video completo.", "subtle", wrap=True)
+        self.cut_note.hide()
+        lay.addWidget(self.cut_note)
         self._set_range_enabled(False)
         return c
 
@@ -633,6 +637,7 @@ class DownloadPage(QWidget):
 
     def _on_range_toggled(self, on: bool) -> None:
         self._set_range_enabled(on)
+        self.cut_note.setVisible(on)
         self._update_estimate()
 
     def _on_slider(self, lo: float, hi: float) -> None:
