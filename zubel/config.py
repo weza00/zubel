@@ -29,7 +29,9 @@ VIDEO_CODECS = [
 ]
 FPS_PREFS = [("Automático", "any"), ("Preferir 60 fps", "60"), ("Máximo 30 fps", "30")]
 SUB_FORMATS = ["srt", "vtt", "ass", "lrc"]
-BROWSERS = ["", "chrome", "firefox", "edge", "brave", "opera", "vivaldi", "chromium", "safari"]
+# Safari solo existe en macOS: yt-dlp falla con "unsupported platform" en otros sistemas.
+BROWSERS = ["", "firefox", "chrome", "edge", "brave", "opera", "vivaldi", "chromium"] + (
+    ["safari"] if paths.IS_MAC else [])
 SPONSORBLOCK_CATEGORIES = [
     ("sponsor", "Patrocinios"),
     ("intro", "Intros"),
@@ -45,7 +47,6 @@ FILENAME_PRESETS = [
     ("Título [id]", "%(title)s [%(id)s].%(ext)s"),
     ("Canal - Título", "%(uploader)s - %(title)s.%(ext)s"),
     ("Fecha - Título", "%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s"),
-    ("Canal/Título", "%(uploader)s/%(title)s.%(ext)s"),
 ]
 
 
@@ -93,7 +94,6 @@ class Settings:
 
     output_dir: str = str(paths.default_download_dir())
     filename_template: str = "%(title)s.%(ext)s"
-    playlist_subfolder: bool = True
     max_concurrent: int = 3
     concurrent_fragments: int = 4
     rate_limit: str = ""
@@ -121,6 +121,13 @@ class Settings:
     defaults: DownloadOptions = field(default_factory=DownloadOptions)
 
 
+def flat_template(template: str) -> str:
+    """Quita los separadores de carpeta: todo se guarda directo en la carpeta elegida."""
+    flat = template.replace("\\", "/")
+    flat = " - ".join(part.strip() for part in flat.split("/") if part.strip())
+    return flat or "%(title)s.%(ext)s"
+
+
 def _filter(cls, data: dict) -> dict:
     names = {f.name for f in fields(cls)}
     return {k: v for k, v in data.items() if k in names}
@@ -141,6 +148,9 @@ def load_settings() -> Settings:
     except TypeError:
         settings = Settings()
     settings.defaults = defaults
+    settings.filename_template = flat_template(settings.filename_template)
+    if settings.cookies_browser not in BROWSERS:
+        settings.cookies_browser = ""
     return settings
 
 

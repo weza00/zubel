@@ -58,7 +58,8 @@ class InfoFetcher(QObject):
         if code != 0 or not out.strip():
             lines = [l for l in err.splitlines() if l.strip()]
             msg = next((l[6:].strip() for l in reversed(lines) if l.startswith("ERROR:")), None)
-            self.failed.emit(msg or (lines[-1] if lines else "No se pudo obtener información."))
+            self.failed.emit(ytdlp.friendly_error(
+                msg or (lines[-1] if lines else "No se pudo obtener información.")))
             return
         try:
             self.finished.emit(ytdlp.info_from_json(out, self._url))

@@ -136,9 +136,8 @@ class SettingsPage(QWidget):
         self.tpl_combo.currentTextChanged.connect(self._changed)
         lay.addWidget(field("Carpeta de descargas", holder))
         lay.addWidget(field("Plantilla de nombre", self.tpl_combo,
-                            "Usa campos de yt-dlp: %(title)s, %(uploader)s, %(id)s, %(upload_date)s, %(ext)s…"))
-        self.sw_playlist_dir = LabeledSwitch("Crear carpeta por playlist", "Playlist/001 - Título.ext",
-                                             self.settings.playlist_subfolder)
+                            "Campos de yt-dlp: %(title)s, %(uploader)s, %(id)s, %(upload_date)s, %(ext)s… "
+                            "Los archivos se guardan directo en la carpeta, sin subcarpetas."))
         self.sw_overwrite = LabeledSwitch("Sobrescribir archivos existentes", "", self.settings.overwrite)
         self.sw_restrict = LabeledSwitch("Nombres de archivo seguros", "Solo ASCII, sin espacios ni símbolos.",
                                          self.settings.restrict_filenames)
@@ -147,7 +146,7 @@ class SettingsPage(QWidget):
         self.sw_archive = LabeledSwitch("Registro de descargas (archive)",
                                         "Omite videos que ya descargaste antes; útil para playlists.",
                                         self.settings.use_archive)
-        for sw in (self.sw_playlist_dir, self.sw_overwrite, self.sw_restrict, self.sw_mtime, self.sw_archive):
+        for sw in (self.sw_overwrite, self.sw_restrict, self.sw_mtime, self.sw_archive):
             sw.toggled.connect(self._changed)
             lay.addWidget(sw)
         return c
@@ -324,8 +323,7 @@ class SettingsPage(QWidget):
         data = self.tpl_combo.currentData()
         if data and tpl == self.tpl_combo.itemText(self.tpl_combo.currentIndex()):
             tpl = data
-        s.filename_template = tpl or "%(title)s.%(ext)s"
-        s.playlist_subfolder = self.sw_playlist_dir.isChecked()
+        s.filename_template = config.flat_template(tpl or "%(title)s.%(ext)s")
         s.overwrite = self.sw_overwrite.isChecked()
         s.restrict_filenames = self.sw_restrict.isChecked()
         s.no_mtime = self.sw_mtime.isChecked()

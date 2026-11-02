@@ -17,7 +17,7 @@
 - **Tabla de formatos** para elegir manualmente los streams exactos de video y audio.
 - **Subtítulos** (normales y automáticos, idiomas, SRT/VTT/ASS/LRC, incrustados), **miniatura** y **metadatos** incrustados, capítulos, división por capítulos, descripción e info JSON.
 - **SponsorBlock**: elimina o marca patrocinios, intros, outros, autopromoción, etc.
-- **Playlists**: lista con casillas para elegir qué elementos bajar, orden inverso y carpeta por playlist.
+- **Playlists**: lista con casillas para elegir qué elementos bajar, orden inverso. Todo se guarda directo en la carpeta elegida, sin subcarpetas.
 - **Varias descargas a la vez** con cola, límite configurable, pausa/reanudación, reintento, cancelación, registro de yt-dlp por descarga y cola persistente entre sesiones.
 - **Red**: cookies del navegador o archivo (contenido privado o con restricción de edad), proxy, límite de velocidad, fragmentos en paralelo, reintentos, IPv4, geo-bypass, User-Agent.
 - **Interfaz**: tema oscuro, animaciones (transiciones, interruptores, indicador lateral, barras de progreso suaves, notificaciones), color de acento, detección de enlaces del portapapeles, notificaciones del sistema, búsqueda en YouTube escribiendo texto.

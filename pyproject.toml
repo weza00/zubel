@@ -1,6 +1,6 @@
 [project]
 name = "zubel"
-version = "1.0.0"
+version = "1.0.1"
 description = "Interfaz gráfica moderna para yt-dlp: descarga videos y audio en MP4, MP3 y más."
 readme = "README.md"
 requires-python = ">=3.10"

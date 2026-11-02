@@ -361,7 +361,7 @@ class DownloadManager(QObject):
         if len(task.log) > 500:
             del task.log[1:100]
         if line.startswith("ERROR:"):
-            task.error = line[6:].strip()
+            task.error = ytdlp.friendly_error(line[6:].strip())
 
     def _proc_error(self, task: DownloadTask, proc: QProcess, err) -> None:
         if err == QProcess.ProcessError.FailedToStart:

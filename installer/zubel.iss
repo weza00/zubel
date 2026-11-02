@@ -7,7 +7,7 @@
 ; descargan sus últimas versiones desde los repositorios oficiales.
 
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.0.1"
 #endif
 #define AppName "Zubel"
 #define AppExe "Zubel.exe"

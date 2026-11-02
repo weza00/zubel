@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from zubel import paths
-from zubel.config import DownloadOptions, Settings
+from zubel.config import DownloadOptions, Settings, flat_template
 
 PROGRESS_PREFIX = "[zubel] "
 PP_PREFIX = "[zubel-pp] "
@@ -365,9 +365,8 @@ def download_args(url: str, opts: DownloadOptions, settings: Settings,
         args.append("--no-playlist")
 
     # --- Salida -------------------------------------------------------------
-    template = settings.filename_template or "%(title)s.%(ext)s"
-    if is_playlist and settings.playlist_subfolder:
-        template = "%(playlist_title,playlist|Playlist)s/%(playlist_index|0)03d - " + template
+    # Sin subcarpetas: cada archivo va directo a la carpeta de destino.
+    template = flat_template(settings.filename_template or "%(title)s.%(ext)s")
     args += ["-P", settings.output_dir, "-P", f"temp:{temp_dir}", "-o", template]
     if paths.IS_WINDOWS:
         args.append("--windows-filenames")
@@ -503,6 +502,26 @@ def parse_time(text: str) -> float | None:
     for p in parts:
         total = total * 60 + p
     return total
+
+
+_ERROR_HINTS = [
+    ("unsupported platform", "El navegador elegido para las cookies no existe en este sistema. "
+                             "Cámbialo en Ajustes → Red y cuenta."),
+    ("could not copy", "No se pudieron leer las cookies: cierra el navegador o usa Firefox / un archivo cookies.txt."),
+    ("failed to decrypt", "El navegador cifra sus cookies y yt-dlp no puede leerlas. "
+                          "Usa Firefox o exporta un archivo cookies.txt (Ajustes → Red y cuenta)."),
+    ("could not find", "No se encontraron cookies del navegador elegido. Revisa Ajustes → Red y cuenta."),
+    ("sign in to confirm", "YouTube pide iniciar sesión. Configura cookies en Ajustes → Red y cuenta."),
+]
+
+
+def friendly_error(message: str) -> str:
+    """Añade una explicación en español a los errores habituales de yt-dlp."""
+    low = message.lower()
+    for needle, hint in _ERROR_HINTS:
+        if needle in low and ("cookie" in low or needle in ("unsupported platform", "sign in to confirm")):
+            return f"{hint} ({message})"
+    return message
 
 
 def info_from_json(raw: str, url: str) -> MediaInfo:
